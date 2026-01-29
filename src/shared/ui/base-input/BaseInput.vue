@@ -10,19 +10,14 @@
         class="input text-medium"
         :value="modelValue"
         :type="type"
-        :inputmode="numeric ? 'numeric' : undefined"
-        :pattern="numeric ? '[0-9]*' : undefined"
         v-bind="$attrs"
         :style="{ opacity: isFocused ? 1 : 0.3 }"
-        @beforeinput="onBeforeInput"
         @input="onInput"
-        @keydown="onKeyDown"
-        @paste="onPaste"
         @focus="onFocus"
         @blur="onBlur"
       />
 
-      <slot name="append"></slot>
+      <slot name="append" />
     </span>
   </label>
 </template>
@@ -33,13 +28,11 @@ import { ref } from 'vue';
 interface BaseInputProps {
   modelValue: string;
   topLabel?: string;
-  type?: string;
-  numeric?: boolean;
+  type?: HTMLInputElement['type'];
 }
 
-const props = withDefaults(defineProps<BaseInputProps>(), {
+withDefaults(defineProps<BaseInputProps>(), {
   type: 'text',
-  numeric: false,
 });
 
 const emit = defineEmits<{
@@ -51,43 +44,18 @@ const emit = defineEmits<{
 const isFocused = ref(false);
 const inputRef = ref<HTMLInputElement | null>(null);
 
-const onFocus = (ev: FocusEvent) => {
-  isFocused.value = true;
-  emit('focus', ev);
-};
-
-const onBlur = (ev: FocusEvent) => {
-  isFocused.value = false;
-  emit('blur', ev);
-};
-
 const onInput = (e: Event) => {
   emit('update:modelValue', (e.target as HTMLInputElement).value);
 };
 
-const onBeforeInput = (e: InputEvent) => {
-  if (!props.numeric) return;
-  if (e.data && /\D/.test(e.data)) {
-    e.preventDefault();
-  }
+const onFocus = (e: FocusEvent) => {
+  isFocused.value = true;
+  emit('focus', e);
 };
 
-const onKeyDown = (e: KeyboardEvent) => {
-  if (!props.numeric) return;
-
-  const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'];
-
-  if (allowed.includes(e.key)) return;
-  if (/^\d$/.test(e.key)) return;
-
-  e.preventDefault();
-};
-
-const onPaste = (e: ClipboardEvent) => {
-  if (!props.numeric) return;
-
-  const text = e.clipboardData?.getData('text') ?? '';
-  if (!/^\d+$/.test(text)) e.preventDefault();
+const onBlur = (e: FocusEvent) => {
+  isFocused.value = false;
+  emit('blur', e);
 };
 
 defineExpose({

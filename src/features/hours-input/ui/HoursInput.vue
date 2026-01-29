@@ -1,10 +1,12 @@
 <template>
   <BaseInput
     ref="baseInputRef"
-    :model-value="displayValue"
+    :model-value="formatted"
     :top-label="topLabel"
-    numeric
-    @update:model-value="handleInput"
+    inputmode="numeric"
+    pattern="[0-9 ]*"
+    :style="inputStyle"
+    @update:model-value="onInput"
     @focus="emit('focus', $event)"
     @blur="emit('blur', $event)"
   >
@@ -15,11 +17,10 @@
 </template>
 
 <script setup lang="ts">
-import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { type ComponentPublicInstance, computed, onMounted, ref } from 'vue';
 import { BaseInput, type BaseInputExposed } from '../../../shared/ui';
 
-const DEFAULT_TOP_LABEL = 'SAMUEL IS';
-const DEFAULT_APPEND_LABEL = 'hours old';
+const MAX = Number.MAX_SAFE_INTEGER;
 
 interface HoursInputProps {
   modelValue: number;
@@ -30,8 +31,8 @@ interface HoursInputProps {
 
 const props = withDefaults(defineProps<HoursInputProps>(), {
   modelValue: 0,
-  topLabel: DEFAULT_TOP_LABEL,
-  appendLabel: DEFAULT_APPEND_LABEL,
+  topLabel: 'SAMUEL IS',
+  appendLabel: 'hours old',
   minWidthPx: 72,
 });
 
@@ -43,75 +44,62 @@ const emit = defineEmits<{
 
 const baseInputRef = ref<ComponentPublicInstance<BaseInputExposed> | null>(null);
 
-const formatGrouped = (value: number) => {
-  const raw = Math.max(0, Number.isFinite(value) ? Math.trunc(value) : 0).toString();
-  return raw.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-};
-
-const displayValue = computed(() => formatGrouped(props.modelValue));
-
-const handleInput = (value: string) => {
-  const digits = value.replace(/\D/g, '');
-  emit('update:modelValue', digits ? Number(digits) : 0);
-};
-
 const getInputEl = (): HTMLInputElement | null => {
   const el = baseInputRef.value?.inputEl ?? null;
   return el instanceof HTMLInputElement ? el : null;
 };
 
-const canvas = document.createElement('canvas');
-const ctx = canvas.getContext('2d');
+const onlyDigits = (v: string) => v.replace(/\D/g, '');
 
-const measureTextWidth = (text: string, font: string) => {
-  if (!ctx) return text.length * 10;
-  ctx.font = font;
-  return ctx.measureText(text).width;
+const formatGrouped = (v: string) => v.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+const raw = computed(() => (props.modelValue > 0 ? String(props.modelValue) : ''));
+
+const formatted = computed(() => formatGrouped(raw.value));
+
+const onInput = (input: string) => {
+  const digits = onlyDigits(input);
+
+  if (!digits) {
+    emit('update:modelValue', 0);
+    return;
+  }
+
+  const maxLength = String(MAX).length;
+  const trimmed = digits.slice(0, maxLength);
+
+  const next = Number(trimmed);
+
+  if (next > MAX) {
+    return;
+  }
+
+  emit('update:modelValue', next);
 };
 
-const updateWidth = async () => {
-  await nextTick();
+const inputStyle = computed(() => {
+  const length = Math.max(formatted.value.length, 1);
+  return {
+    width: `max(${props.minWidthPx}px, ${length + 1}ch)`,
+  };
+});
 
-  const inputEl = getInputEl();
-  if (!inputEl) return;
+const onBeforeInput = (e: InputEvent) => {
+  if (!e.data) return;
 
-  const styles = getComputedStyle(inputEl);
-  const font = styles.font;
-  const paddingLeft = Number.parseFloat(styles.paddingLeft || '0') || 0;
-  const paddingRight = Number.parseFloat(styles.paddingRight || '0') || 0;
+  const next = onlyDigits(formatted.value + e.data);
+  const maxLength = String(MAX).length;
 
-  const text = displayValue.value || '0';
-  const textWidth = measureTextWidth(text, font);
-  const width = Math.ceil(textWidth + paddingLeft + paddingRight);
-
-  inputEl.style.width = `${Math.max(props.minWidthPx, width)}px`;
+  if (next.length > maxLength || Number(next) > MAX) {
+    e.preventDefault();
+  }
 };
 
-watch(displayValue, updateWidth, { immediate: true });
+onMounted(() => {
+  const input = getInputEl();
 
-let ro: ResizeObserver | null = null;
+  if (!input) return;
 
-watch(
-  () => baseInputRef.value,
-  async () => {
-    await nextTick();
-
-    const inputEl = getInputEl();
-    if (!inputEl) return;
-
-    ro?.disconnect();
-    ro = new ResizeObserver(() => {
-      void updateWidth();
-    });
-
-    ro.observe(inputEl);
-    void updateWidth();
-  },
-  { immediate: true },
-);
-
-onBeforeUnmount(() => {
-  ro?.disconnect();
-  ro = null;
+  input.addEventListener('beforeinput', onBeforeInput);
 });
 </script>
