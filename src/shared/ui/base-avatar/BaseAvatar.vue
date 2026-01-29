@@ -49,7 +49,12 @@ withDefaults(defineProps<BaseAvatarProps>(), {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 1px solid var(--color-primary);
+  border: 1px solid transparent;
   padding: 3px;
+  transition: border-color 0.3s ease-in-out;
+}
+
+.avatar-wrapper--active {
+  border: 1px solid var(--color-primary);
 }
 </style>

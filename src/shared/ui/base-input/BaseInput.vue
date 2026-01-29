@@ -16,8 +16,8 @@
       @input="onInput"
       @keydown="onKeyDown"
       @paste="onPaste"
-      @focus="isFocused = true"
-      @blur="isFocused = false"
+      @focus="onFocus"
+      @blur="onBlur"
       :style="{ opacity: isFocused ? 1 : 0.3 }"
     />
   </label>
@@ -40,10 +40,22 @@ const props = withDefaults(defineProps<BaseInputProps>(), {
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void;
+  (e: 'focus', ev: FocusEvent): void;
+  (e: 'blur', ev: FocusEvent): void;
 }>();
 
 const isFocused = ref(false);
 const inputRef = ref<HTMLInputElement | null>(null);
+
+const onFocus = (ev: FocusEvent) => {
+  isFocused.value = true;
+  emit('focus', ev);
+};
+
+const onBlur = (ev: FocusEvent) => {
+  isFocused.value = false;
+  emit('blur', ev);
+};
 
 const onInput = (e: Event) => {
   emit('update:modelValue', (e.target as HTMLInputElement).value);
@@ -71,15 +83,13 @@ const onPaste = (e: ClipboardEvent) => {
   if (!props.numeric) return;
 
   const text = e.clipboardData?.getData('text') ?? '';
-  if (!/^\d+$/.test(text)) {
-    e.preventDefault();
-  }
+  if (!/^\d+$/.test(text)) e.preventDefault();
 };
 </script>
 
 <style scoped>
 .wrapper {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   gap: 12px;
 }
@@ -87,6 +97,10 @@ const onPaste = (e: ClipboardEvent) => {
 .label {
   text-align: start;
   color: var(--color-primary);
+}
+
+.label--focused {
+  color: var(--color-accent);
 }
 
 .input {
