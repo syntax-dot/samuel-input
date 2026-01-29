@@ -1,0 +1,8 @@
+:root {
+    --color-dark: #1E0E4C;
+    --color-primary: #3D06D7;
+    --color-accent: #906FEE;
+
+    --font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-family-heading: 'Koulen', system-ui, sans-serif;
+}
