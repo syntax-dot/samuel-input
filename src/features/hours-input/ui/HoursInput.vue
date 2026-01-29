@@ -5,6 +5,8 @@
     top-label="SAMUEL IS"
     numeric
     @update:model-value="handleInput"
+    @focus="emit('focus', $event)"
+    @blur="emit('blur', $event)"
   />
 </template>
 
@@ -22,6 +24,8 @@ const props = withDefaults(defineProps<HoursInputProps>(), {
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: number): void;
+  (e: 'focus', ev: FocusEvent): void;
+  (e: 'blur', ev: FocusEvent): void;
 }>();
 
 const baseInputRef = ref<InstanceType<typeof BaseInput> | null>(null);
