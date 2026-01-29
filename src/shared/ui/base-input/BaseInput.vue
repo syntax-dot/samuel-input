@@ -1,25 +1,29 @@
 <template>
   <label class="wrapper">
-    <span v-if="topLabel" class="label text-heading">
+    <span v-if="topLabel" class="label text-heading" :class="{ 'label--focused': isFocused }">
       {{ topLabel }}
     </span>
 
-    <input
-      ref="inputRef"
-      class="input text-medium"
-      :value="modelValue"
-      :type="type"
-      :inputmode="numeric ? 'numeric' : undefined"
-      :pattern="numeric ? '[0-9]*' : undefined"
-      @beforeinput="onBeforeInput"
-      v-bind="$attrs"
-      @input="onInput"
-      @keydown="onKeyDown"
-      @paste="onPaste"
-      @focus="onFocus"
-      @blur="onBlur"
-      :style="{ opacity: isFocused ? 1 : 0.3 }"
-    />
+    <span class="input-wrapper">
+      <input
+        ref="inputRef"
+        class="input text-medium"
+        :value="modelValue"
+        :type="type"
+        :inputmode="numeric ? 'numeric' : undefined"
+        :pattern="numeric ? '[0-9]*' : undefined"
+        v-bind="$attrs"
+        :style="{ opacity: isFocused ? 1 : 0.3 }"
+        @beforeinput="onBeforeInput"
+        @input="onInput"
+        @keydown="onKeyDown"
+        @paste="onPaste"
+        @focus="onFocus"
+        @blur="onBlur"
+      />
+
+      <slot name="append"></slot>
+    </span>
   </label>
 </template>
 
@@ -94,13 +98,20 @@ const onPaste = (e: ClipboardEvent) => {
   gap: 12px;
 }
 
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .label {
   text-align: start;
-  color: var(--color-primary);
+  color: var(--color-dark);
+  transition: color 0.3s ease-in-out;
 }
 
 .label--focused {
-  color: var(--color-accent);
+  color: var(--color-primary);
 }
 
 .input {

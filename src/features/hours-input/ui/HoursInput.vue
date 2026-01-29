@@ -2,24 +2,35 @@
   <BaseInput
     ref="baseInputRef"
     :model-value="formatted"
-    top-label="SAMUEL IS"
+    :top-label="topLabel"
     numeric
     @update:model-value="handleInput"
     @focus="emit('focus', $event)"
     @blur="emit('blur', $event)"
-  />
+  >
+    <template v-if="appendLabel" #append>
+      <span>{{ appendLabel }}</span>
+    </template>
+  </BaseInput>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
 import { BaseInput } from '../../../shared/ui';
 
+const DEFAULT_TOP_LABEL = 'SAMUEL IS';
+const DEFAULT_APPEND_LABEL = 'hours old';
+
 interface HoursInputProps {
   modelValue: number;
+  topLabel?: string;
+  appendLabel?: string;
 }
 
 const props = withDefaults(defineProps<HoursInputProps>(), {
   modelValue: 0,
+  topLabel: DEFAULT_TOP_LABEL,
+  appendLabel: DEFAULT_APPEND_LABEL,
 });
 
 const emit = defineEmits<{
