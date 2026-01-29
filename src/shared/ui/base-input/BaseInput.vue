@@ -75,7 +75,7 @@ const onBeforeInput = (e: InputEvent) => {
 const onKeyDown = (e: KeyboardEvent) => {
   if (!props.numeric) return;
 
-  const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+  const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'];
 
   if (allowed.includes(e.key)) return;
   if (/^\d$/.test(e.key)) return;
@@ -89,6 +89,10 @@ const onPaste = (e: ClipboardEvent) => {
   const text = e.clipboardData?.getData('text') ?? '';
   if (!/^\d+$/.test(text)) e.preventDefault();
 };
+
+defineExpose({
+  inputEl: inputRef,
+});
 </script>
 
 <style scoped>
