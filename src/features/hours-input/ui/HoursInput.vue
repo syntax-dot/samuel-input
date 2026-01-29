@@ -56,8 +56,8 @@ const handleInput = (value: string) => {
 };
 
 const getInputEl = (): HTMLInputElement | null => {
-  const maybe = baseInputRef.value?.inputEl ?? null;
-  return maybe instanceof HTMLInputElement ? maybe : null;
+  const el = baseInputRef.value?.inputEl ?? null;
+  return el instanceof HTMLInputElement ? el : null;
 };
 
 const canvas = document.createElement('canvas');
