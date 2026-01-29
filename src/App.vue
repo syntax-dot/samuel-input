@@ -20,6 +20,5 @@ const isFocus = ref(false);
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
-  justify-content: center;
 }
 </style>

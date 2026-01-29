@@ -11,7 +11,7 @@
     @blur="emit('blur', $event)"
   >
     <template v-if="appendLabel" #append>
-      <span>{{ appendLabel }}</span>
+      <span class="append-label">{{ appendLabel }}</span>
     </template>
   </BaseInput>
 </template>
@@ -103,3 +103,8 @@ onMounted(() => {
   input.addEventListener('beforeinput', onBeforeInput);
 });
 </script>
+<style scoped>
+.append-label {
+  white-space: nowrap;
+}
+</style>
