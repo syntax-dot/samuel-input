@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { HoursInput } from './features/hours-input';
 import { ref } from 'vue';
+import { BaseAvatar } from './shared/ui/base-avatar';
 
 const hours = ref(7);
 </script>
 
 <template>
+  <BaseAvatar />
   <HoursInput v-model="hours" />
 </template>
 
